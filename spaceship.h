@@ -103,9 +103,9 @@ void rotate(Spaceship *self, double h)
 void set_direction(Spaceship *self, float x, float y)
 {
     double tv[2] = { x - self->cx, y - self->cy };
-    double d = sqrt(tv[0] * tv[0] + tv[1] * tv[1]);
-    tv[0] *= (1.0 / d);
-    tv[1] *= (1.0 / d);
+    double d = 1.0 / sqrt(tv[0] * tv[0] + tv[1] * tv[1]);
+    tv[0] *= d;
+    tv[1] *= d;
 
     double sv[2] = { cos(self->r), sin(self->r) };
 
@@ -122,9 +122,9 @@ void set_direction(Spaceship *self, float x, float y)
 void rotate_toward(Spaceship *self, float x, float y)
 {
     double tv[2] = { x - self->cx, y - self->cy };
-    double d = sqrt(tv[0] * tv[0] + tv[1] * tv[1]);
-    tv[0] *= (1.0 / d);
-    tv[1] *= (1.0 / d);
+    double d = 1.0 / sqrt(tv[0] * tv[0] + tv[1] * tv[1]);
+    tv[0] *= d;
+    tv[1] *= d;
 
     double sv[2] = { cos(self->r), sin(self->r) };
 
@@ -174,7 +174,7 @@ void update(Spaceship *self)
 void draw(Spaceship *self)
 {
     glColor3f(self->color[0], self->color[1], self->color[2]);
-    glLineWidth(1.0f);
+    glLineWidth(1.5f);
     glBegin(GL_LINES);
     for (int i = 0; i < SPACESHIP_POINTS; i++)
     {
