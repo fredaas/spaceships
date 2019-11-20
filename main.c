@@ -3,7 +3,7 @@
 
 #define FPS 60
 #define UPDATE_RATE 1000 / (float)FPS
-#define NUM_SPACESHIPS 200
+#define NUM_SPACESHIPS 1000
 
 enum {
     MOUSE_LEFT,
@@ -200,6 +200,16 @@ int main(int argc, char **argv)
 {
     srand(time(NULL));
 
+    int n_threads = 0;
+
+    #pragma omp parallel
+    {
+        #pragma omp atomic
+        n_threads++;
+    }
+
+    printf("%d\n", n_threads);
+
     initialize();
 
     Spaceship *spaceships[NUM_SPACESHIPS];
@@ -216,6 +226,9 @@ int main(int argc, char **argv)
 
     double start = walltime();
 
+    double tx = mx,
+           ty = my;
+
     while (!glfwWindowShouldClose(window))
     {
         glfwGetFramebufferSize(window, &window_w, &window_h);
@@ -227,23 +240,33 @@ int main(int argc, char **argv)
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        tx = mx;
+        ty = my;
+
         double delay = (walltime() - start) * 1.0e+3;
         if (delay > UPDATE_RATE)
         {
             start = walltime();
+            #pragma omp parallel for
             for (int i = 0; i < NUM_SPACESHIPS; i++)
             {
                 Spaceship *s = spaceships[i];
-                s->rotate_toward(s, mx, my);
+                s->rotate_toward(s, tx, ty);
                 s->dx = s->acceleration * cos(s->r);
                 s->dy = s->acceleration * sin(s->r);
             }
         }
 
+        #pragma omp parallel for
         for (int i = 0; i < NUM_SPACESHIPS; i++)
         {
             Spaceship *s = spaceships[i];
             s->update(s);
+        }
+
+        for (int i = 0; i < NUM_SPACESHIPS; i++)
+        {
+            Spaceship *s = spaceships[i];
             s->draw(s);
         }
 

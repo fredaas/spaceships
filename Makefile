@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-std=c99 -Wall -O2 -lm -lGL -lGLU -lglfw
+CFLAGS=-std=c99 -Wall -O3 -lm -lGL -lGLU -lglfw -fopenmp
 SRC=$(wildcard *.c)
 OBJ=$(patsubst %.c,%.o,$(SRC))
 
