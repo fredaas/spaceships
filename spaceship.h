@@ -173,6 +173,7 @@ void update(Spaceship *self)
 
 void draw(Spaceship *self)
 {
+    /* TODO: Look into glDrawArrays for more efficient line drawing */
     glColor3f(self->color[0], self->color[1], self->color[2]);
     glLineWidth(1.5f);
     glBegin(GL_LINES);
