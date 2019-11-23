@@ -10,8 +10,7 @@
 typedef struct Spaceship Spaceship;
 
 struct Spaceship {
-    float x[SPACESHIP_POINTS];
-    float y[SPACESHIP_POINTS];
+    float shape[SPACESHIP_POINTS * 2];
     float cx;
     float cy;
     float dx;
@@ -68,28 +67,21 @@ Spaceship * init_spaceship(float cx, float cy, double r)
 
 void set_shape(Spaceship *self)
 {
-    self->x[0] = 0;
-    self->y[0] = 15.0;
-    self->x[1] = 10.0;
-    self->y[1] = -15.0;
-    self->x[2] = 0;
-    self->y[2] = -10.0;
-    self->x[3] = -10.0;
-    self->y[3] = -15.0;
+    float shape[SPACESHIP_POINTS * 2] = {
+        0, 15.0, 10.0, -15.0, 0, -10.0, -10.0, -15.0
+    };
+    memcpy(self->shape, shape, SPACESHIP_POINTS * 2 * sizeof(float));
 }
 
 void rotate(Spaceship *self, double h)
 {
-    float prev_x[4];
-    float prev_y[4];
+    float prev_shape[SPACESHIP_POINTS * 2];
+    memcpy(prev_shape, self->shape, SPACESHIP_POINTS * 2 * sizeof(float));
 
-    memcpy(prev_x, self->x, 4 * sizeof(float));
-    memcpy(prev_y, self->y, 4 * sizeof(float));
-
-    for (int i = 0; i < SPACESHIP_POINTS; i++)
+    for (int x = 0, y = 1; y < SPACESHIP_POINTS * 2; x += 2, y += 2)
     {
-        self->x[i] = rotate_x(prev_x[i], prev_y[i], h);
-        self->y[i] = rotate_y(prev_x[i], prev_y[i], h);
+        self->shape[x] = rotate_x(prev_shape[x], prev_shape[y], h);
+        self->shape[y] = rotate_y(prev_shape[x], prev_shape[y], h);
     }
 
     self->r += h;
@@ -173,19 +165,29 @@ void update(Spaceship *self)
 
 void draw(Spaceship *self)
 {
-    /* TODO: Look into glDrawArrays for more efficient line drawing */
-    glColor3f(self->color[0], self->color[1], self->color[2]);
-    glLineWidth(1.5f);
-    glBegin(GL_LINES);
-    for (int i = 0; i < SPACESHIP_POINTS; i++)
+    float color[9] = {
+        1, 0, 0,
+        0, 1, 0,
+        0, 0, 1
+    };
+
+    float shape[SPACESHIP_POINTS * 2];
+    memcpy(shape, self->shape, SPACESHIP_POINTS * 2 * sizeof(float));
+    for (int x = 0, y = 1; y < SPACESHIP_POINTS * 2; x += 2, y += 2)
     {
-        glVertex2f(self->x[i] + self->cx, self->y[i] + self->cy);
-        glVertex2f(
-            self->x[(i + 1) % SPACESHIP_POINTS] + self->cx,
-            self->y[(i + 1) % SPACESHIP_POINTS] + self->cy
-        );
+        shape[x] += self->cx;
+        shape[y] += self->cy;
     }
-    glEnd();
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+
+    glColorPointer(3, GL_FLOAT, 0, color);
+    glVertexPointer(2, GL_FLOAT, 0, shape);
+    glDrawArrays(GL_LINE_LOOP, 0, SPACESHIP_POINTS);
+
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
 }
 
 #endif /* SPACESHIP_H */
