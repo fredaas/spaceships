@@ -196,12 +196,6 @@ void initialize(void)
     /* Configure OpenGL */
 
     glEnable(GL_MULTISAMPLE);
-
-    glfwGetFramebufferSize(window, &window_w, &window_h);
-    glViewport(0, 0, window_w, window_h);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluOrtho2D(0.0, window_w, 0, window_h);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     /* Init spaceships */
@@ -234,17 +228,15 @@ int main(int argc, char **argv)
 
     double start = walltime();
 
-    double tx = mx,
-           ty = my;
-
-    glEnableClientState(GL_VERTEX_ARRAY);
-
     while (!glfwWindowShouldClose(window))
     {
-        glClear(GL_COLOR_BUFFER_BIT);
+        glfwGetFramebufferSize(window, &window_w, &window_h);
+        glViewport(0, 0, window_w, window_h);
 
-        tx = mx;
-        ty = my;
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        gluOrtho2D(0.0, window_w, 0, window_h);
+        glClear(GL_COLOR_BUFFER_BIT);
 
         double delay = (walltime() - start) * 1.0e+3;
         if (delay > UPDATE_RATE)
@@ -254,7 +246,7 @@ int main(int argc, char **argv)
             for (int i = 0; i < NUM_SPACESHIPS; i++)
             {
                 Spaceship *s = spaceships[i];
-                s->rotate_toward(s, tx, ty);
+                s->rotate_toward(s, mx, my);
                 s->dx = s->acceleration * cos(s->r);
                 s->dy = s->acceleration * sin(s->r);
             }
