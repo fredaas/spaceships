@@ -228,6 +228,8 @@ int main(int argc, char **argv)
 
     double start = walltime();
 
+    glEnableClientState(GL_VERTEX_ARRAY);
+
     while (!glfwWindowShouldClose(window))
     {
         glfwGetFramebufferSize(window, &window_w, &window_h);
