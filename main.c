@@ -237,6 +237,8 @@ int main(int argc, char **argv)
     double tx = mx,
            ty = my;
 
+    glEnableClientState(GL_VERTEX_ARRAY);
+
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT);
@@ -274,6 +276,8 @@ int main(int argc, char **argv)
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
+    glDisableClientState(GL_VERTEX_ARRAY);
 
     glfwDestroyWindow(window);
     glfwTerminate();

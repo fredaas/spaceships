@@ -48,6 +48,7 @@ Spaceship * init_spaceship(float cx, float cy, double r)
     self->dy = 0.0;
     self->h = rand_float(0.025, 0.05);
     self->acceleration = rand_float(0.1, 0.15);
+
     self->color[0] = rand_float(0, 1);
     self->color[1] = rand_float(0, 1);
     self->color[2] = rand_float(0, 1);
@@ -170,12 +171,6 @@ void update(Spaceship *self)
 
 void draw(Spaceship *self)
 {
-    float color[9] = {
-        1, 0, 0,
-        0, 1, 0,
-        0, 0, 1
-    };
-
     float shape[SPACESHIP_POINTS * 2];
     memcpy(shape, self->shape, SPACESHIP_POINTS * 2 * sizeof(float));
     for (int x = 0, y = 1; y < SPACESHIP_POINTS * 2; x += 2, y += 2)
@@ -184,15 +179,9 @@ void draw(Spaceship *self)
         shape[y] += self->cy;
     }
 
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
-
-    glColorPointer(3, GL_FLOAT, 0, color);
+    glColor3fv(self->color);
     glVertexPointer(2, GL_FLOAT, 0, shape);
     glDrawArrays(GL_LINE_LOOP, 0, SPACESHIP_POINTS);
-
-    glDisableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
 }
 
 #endif /* SPACESHIP_H */
