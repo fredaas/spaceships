@@ -73,6 +73,8 @@ void set_shape(Spaceship *self)
     memcpy(self->shape, shape, SPACESHIP_POINTS * 2 * sizeof(float));
 }
 
+/* Rotates the shape of the object by 'h' radians relative to the objects
+   current direction */
 void rotate(Spaceship *self, double h)
 {
     float prev_shape[SPACESHIP_POINTS * 2];
@@ -92,6 +94,7 @@ void rotate(Spaceship *self, double h)
         self->r += 2 * PI;
 }
 
+/* Sets the current direction of the object to point to (x, y) */
 void set_direction(Spaceship *self, float x, float y)
 {
     double tv[2] = { x - self->cx, y - self->cy };
@@ -111,6 +114,7 @@ void set_direction(Spaceship *self, float x, float y)
     rotate(self, k * h);
 }
 
+/* Rotates the object towards (x, y) by 'self->h' radians */
 void rotate_toward(Spaceship *self, float x, float y)
 {
     double tv[2] = { x - self->cx, y - self->cy };
@@ -130,6 +134,7 @@ void rotate_toward(Spaceship *self, float x, float y)
     rotate(self, k * self->h);
 }
 
+/* Sets the current direction of the object to 'r' radians */
 void set_angle(Spaceship *self, double r)
 {
     rotate(self, r - self->r);
