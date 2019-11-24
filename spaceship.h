@@ -78,6 +78,8 @@ void set_shape(Spaceship *self)
     self->y[3] = -15.0;
 }
 
+/* Rotates the shape of the object by 'h' radians relative to the objects
+   current direction */
 void rotate(Spaceship *self, double h)
 {
     float prev_x[4];
@@ -100,6 +102,7 @@ void rotate(Spaceship *self, double h)
         self->r += 2 * PI;
 }
 
+/* Sets the current direction of the object to point to (x, y) */
 void set_direction(Spaceship *self, float x, float y)
 {
     double tv[2] = { x - self->cx, y - self->cy };
@@ -119,6 +122,7 @@ void set_direction(Spaceship *self, float x, float y)
     rotate(self, k * h);
 }
 
+/* Rotates the object towards (x, y) by 'self->h' radians */
 void rotate_toward(Spaceship *self, float x, float y)
 {
     double tv[2] = { x - self->cx, y - self->cy };
@@ -138,6 +142,7 @@ void rotate_toward(Spaceship *self, float x, float y)
     rotate(self, k * self->h);
 }
 
+/* Sets the current direction of the object to 'r' radians */
 void set_angle(Spaceship *self, double r)
 {
     rotate(self, r - self->r);
@@ -173,7 +178,6 @@ void update(Spaceship *self)
 
 void draw(Spaceship *self)
 {
-    /* TODO: Look into glDrawArrays for more efficient line drawing */
     glColor3f(self->color[0], self->color[1], self->color[2]);
     glLineWidth(1.5f);
     glBegin(GL_LINES);

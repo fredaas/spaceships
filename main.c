@@ -24,6 +24,8 @@ int window_w = 1920,
 
 GLFWwindow* window;
 
+Spaceship *spaceships[NUM_SPACESHIPS];
+
 
 /*******************************************************************************
  *
@@ -161,21 +163,23 @@ double walltime(void)
 
 void initialize(void)
 {
+    /* Configure GLFW */
+
     if (!glfwInit())
     {
         printf("[ERROR] Failed to initialize glfw\n");
         exit(1);
     }
 
-    /* Configure window */
     glfwWindowHint(GLFW_SAMPLES, 4);
-    glEnable(GL_MULTISAMPLE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+
     window = glfwCreateWindow(window_w, window_h, "GLFW Window",
         glfwGetPrimaryMonitor(), NULL);
+
     if (!window)
     {
         printf("[ERROR] Failed to initialize window\n");
@@ -185,34 +189,23 @@ void initialize(void)
     glfwSwapInterval(1);
     glfwMakeContextCurrent(window);
 
-    /* Set callbacks */
     glfwSetKeyCallback(window, key_callback);
     glfwSetCursorPosCallback(window, cursor_position_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
 
+    /* Configure OpenGL */
+
+    glEnable(GL_MULTISAMPLE);
+
+    glfwGetFramebufferSize(window, &window_w, &window_h);
+    glViewport(0, 0, window_w, window_h);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(0.0, window_w, 0, window_h);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glfwSwapBuffers(window);
-    glClear(GL_COLOR_BUFFER_BIT);
-}
 
-int main(int argc, char **argv)
-{
-    srand(time(NULL));
+    /* Init spaceships */
 
-    int n_threads = 0;
-
-    #pragma omp parallel
-    {
-        #pragma omp atomic
-        n_threads++;
-    }
-
-    printf("%d\n", n_threads);
-
-    initialize();
-
-    Spaceship *spaceships[NUM_SPACESHIPS];
     for (int i = 0; i < NUM_SPACESHIPS; i++)
     {
         Spaceship *s = init_spaceship(
@@ -223,6 +216,21 @@ int main(int argc, char **argv)
         s->set_direction(s, mx, my);
         spaceships[i] = s;
     }
+}
+
+int main(int argc, char **argv)
+{
+    srand(time(NULL));
+
+    int n_threads = 0;
+    #pragma omp parallel
+    {
+        #pragma omp atomic
+        n_threads++;
+    }
+    printf("%d\n", n_threads);
+
+    initialize();
 
     double start = walltime();
 
@@ -231,13 +239,6 @@ int main(int argc, char **argv)
 
     while (!glfwWindowShouldClose(window))
     {
-        glfwGetFramebufferSize(window, &window_w, &window_h);
-        glViewport(0, 0, window_w, window_h);
-
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        gluOrtho2D(0.0, window_w, 0, window_h);
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         tx = mx;
