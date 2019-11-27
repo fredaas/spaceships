@@ -17,8 +17,8 @@ int mouse_pressed[2];
 float mx = 0.0,
       my = 0.0;
 
-int window_w = 1920,
-    window_h = 1080,
+int window_w = 800,
+    window_h = 600,
     world_w  = 1500,
     world_h  = 1500;
 
@@ -178,7 +178,7 @@ void initialize(void)
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
     window = glfwCreateWindow(window_w, window_h, "GLFW Window",
-        glfwGetPrimaryMonitor(), NULL);
+        NULL, NULL);
 
     if (!window)
     {
@@ -235,7 +235,16 @@ int main(int argc, char **argv)
 
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        gluOrtho2D(0.0, window_w, 0, window_h);
+        glOrtho(0.0, window_w, 0, window_h, -500, 500);
+
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        gluLookAt (
+            window_w / 2.0, window_h / 2.0, 0.0,
+            window_w / 2.0, window_h / 2.0, -1.0,
+            0.0, 2.0, 0.0
+        );
+
         glClear(GL_COLOR_BUFFER_BIT);
 
         double delay = (walltime() - start) * 1.0e+3;
