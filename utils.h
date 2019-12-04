@@ -21,6 +21,16 @@
 
 #define rand_float(a, b) (a) + (rand() / (float) RAND_MAX) * ((b) - (a))
 
+#define msec(sec) (double)((sec) * 1.0e+3)
+#define usec(sec) (double)((sec) * 1.0e+6)
+
+double walltime(void)
+{
+    static struct timeval t;
+    gettimeofday(&t, NULL);
+    return ((double)t.tv_sec + (double)t.tv_usec * 1.0e-06);
+}
+
 extern int window_w;
 extern int window_h;
 extern int world_w;

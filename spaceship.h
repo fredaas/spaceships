@@ -9,25 +9,33 @@
 
 typedef struct Spaceship Spaceship;
 
+enum { SPACESHIP_DEAD, SPACESHIP_ALIVE, SPACESHIP_IDLE };
+
 struct Spaceship {
     float x[SPACESHIP_POINTS];
     float y[SPACESHIP_POINTS];
+    float tx[SPACESHIP_POINTS];
+    float ty[SPACESHIP_POINTS];
     float cx;
     float cy;
-    float dx;
-    float dy;
+    float alpha;
+    int dead;
+    int state;
     double r;
     double h;
     float color[3];
     float acceleration;
+
     void (*draw)(Spaceship *self);
     void (*rotate_left)(Spaceship *self);
     void (*rotate_right)(Spaceship *self);
     void (*rotate_toward)(Spaceship *self, float x, float y);
     void (*update)(Spaceship *self);
     void (*set_direction)(Spaceship *self, float x, float y);
+    void (*set_dead)(Spaceship *self);
 };
 
+void set_dead(Spaceship *self);
 void draw(Spaceship *self);
 void rotate(Spaceship *self, double h);
 void rotate_left(Spaceship *self);
@@ -45,9 +53,10 @@ Spaceship * init_spaceship(float cx, float cy, double r)
     self->r = PI / 2.0;
     self->cx = cx;
     self->cy = cy;
-    self->dx = 0.0;
-    self->dy = 0.0;
     self->h = rand_float(0.025, 0.05);
+    self->state = SPACESHIP_ALIVE;
+    self->dead = 0;
+    self->alpha = 1.0;
     self->acceleration = rand_float(0.1, 0.15);
     self->color[0] = rand_float(0, 1);
     self->color[1] = rand_float(0, 1);
@@ -158,37 +167,96 @@ void rotate_right(Spaceship *self)
     rotate(self, -self->h);
 }
 
+int faded(Spaceship *self)
+{
+    self->alpha *= 0.9997;
+    if (self->alpha < 0.01)
+    {
+        self->alpha = 0;
+        return 1;
+    }
+    return 0;
+}
+
 void update(Spaceship *self)
 {
-    self->cx += self->dx;
-    self->cy += self->dy;
+    if (self->state == SPACESHIP_IDLE)
+        return;
 
-    float abs_dx = fabs(self->dx);
-    float abs_dy = fabs(self->dy);
-
-    if (abs_dx > SPACESHIP_MAX_SPEED)
-        self->dx = SPACESHIP_MAX_SPEED;
-    else if (abs_dx < SPACESHIP_MIN_SPEED)
-        self->dx = 0.0;
-    if (abs_dy > SPACESHIP_MAX_SPEED)
-        self->dy = SPACESHIP_MAX_SPEED;
-    else if (abs_dy < SPACESHIP_MIN_SPEED)
-        self->dy = 0.0;
+    if (self->state == SPACESHIP_ALIVE)
+    {
+        if (self->dead)
+        {
+            for (int i = 0; i < SPACESHIP_POINTS; i++)
+            {
+                self->tx[i] = self->cx;
+                self->ty[i] = self->cy;
+            }
+            self->state = SPACESHIP_DEAD;
+        }
+        else
+        {
+            self->cx += cos(self->r)* self->acceleration;
+            self->cy += sin(self->r)* self->acceleration;
+        }
+    }
+    else if (self->state == SPACESHIP_DEAD)
+    {
+        double r[SPACESHIP_POINTS] = {
+            -(1 / 4.0) * PI + self->r,
+            -(3 / 4.0) * PI + self->r,
+             (3 / 4.0) * PI + self->r,
+             (1 / 4.0) * PI + self->r,
+        };
+        for (int i = 0; i < SPACESHIP_POINTS; i++)
+        {
+            self->tx[i] += cos(r[i]) * 0.01;
+            self->ty[i] += sin(r[i]) * 0.01;
+        }
+    }
 }
 
 void draw(Spaceship *self)
 {
-    glColor3f(self->color[0], self->color[1], self->color[2]);
+    if (self->state == SPACESHIP_IDLE)
+        return;
+
+    glColor4f(self->color[0], self->color[1], self->color[2], self->alpha);
     glLineWidth(1.5f);
     glBegin(GL_LINES);
-    for (int i = 0; i < SPACESHIP_POINTS; i++)
+
+    if (self->state == SPACESHIP_ALIVE)
     {
-        glVertex2f(self->x[i] + self->cx, self->y[i] + self->cy);
-        glVertex2f(
-            self->x[(i + 1) % SPACESHIP_POINTS] + self->cx,
-            self->y[(i + 1) % SPACESHIP_POINTS] + self->cy
-        );
+        for (int i = 0; i < SPACESHIP_POINTS; i++)
+        {
+            glVertex2f(
+                self->x[i] + self->cx,
+                self->y[i] + self->cy
+            );
+            glVertex2f(
+                self->x[(i + 1) % SPACESHIP_POINTS] + self->cx,
+                self->y[(i + 1) % SPACESHIP_POINTS] + self->cy
+            );
+        }
     }
+    else if (self->state == SPACESHIP_DEAD)
+    {
+        if (faded(self))
+            self->state = SPACESHIP_IDLE;
+
+        for (int i = 0; i < SPACESHIP_POINTS; i++)
+        {
+            glVertex2f(
+                self->x[i] + self->tx[i],
+                self->y[i] + self->ty[i]
+            );
+            glVertex2f(
+                self->x[(i + 1) % SPACESHIP_POINTS] + self->tx[i],
+                self->y[(i + 1) % SPACESHIP_POINTS] + self->ty[i]
+            );
+        }
+    }
+
     glEnd();
 }
 

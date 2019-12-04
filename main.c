@@ -3,7 +3,7 @@
 
 #define FPS 60
 #define UPDATE_RATE 1000 / (float)FPS
-#define NUM_SPACESHIPS 1000
+#define NUM_SPACESHIPS 500
 
 enum {
     MOUSE_LEFT,
@@ -51,6 +51,11 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action,
         case GLFW_KEY_S:
             break;
         case GLFW_KEY_D:
+            for (int i = 0; i < NUM_SPACESHIPS; i++)
+            {
+                Spaceship *s = spaceships[i];
+                s->dead = 1;
+            }
             break;
         }
     }
@@ -154,13 +159,6 @@ void center_window(GLFWwindow *window)
     );
 }
 
-double walltime(void)
-{
-    static struct timeval t;
-    gettimeofday(&t, NULL);
-    return ((double)t.tv_sec + (double)t.tv_usec * 1.0e-06);
-}
-
 void initialize(void)
 {
     /* Configure GLFW */
@@ -195,6 +193,8 @@ void initialize(void)
 
     /* Configure OpenGL */
 
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
     glEnable(GL_MULTISAMPLE);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -216,14 +216,6 @@ int main(int argc, char **argv)
 {
     srand(time(NULL));
 
-    int n_threads = 0;
-    #pragma omp parallel
-    {
-        #pragma omp atomic
-        n_threads++;
-    }
-    printf("%d\n", n_threads);
-
     initialize();
 
     double start = walltime();
@@ -242,17 +234,14 @@ int main(int argc, char **argv)
         if (delay > UPDATE_RATE)
         {
             start = walltime();
-            #pragma omp parallel for
             for (int i = 0; i < NUM_SPACESHIPS; i++)
             {
                 Spaceship *s = spaceships[i];
-                s->rotate_toward(s, mx, my);
-                s->dx = s->acceleration * cos(s->r);
-                s->dy = s->acceleration * sin(s->r);
+                if (!s->dead)
+                    s->rotate_toward(s, mx, my);
             }
         }
 
-        #pragma omp parallel for
         for (int i = 0; i < NUM_SPACESHIPS; i++)
         {
             Spaceship *s = spaceships[i];
