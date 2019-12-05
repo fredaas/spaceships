@@ -3,7 +3,7 @@
 
 #define FPS 60
 #define UPDATE_RATE 1000 / (float)FPS
-#define NUM_SPACESHIPS 500
+#define NUM_SPACESHIPS 200
 
 enum {
     MOUSE_LEFT,
@@ -17,8 +17,8 @@ int mouse_pressed[2];
 float mx = 0.0,
       my = 0.0;
 
-int window_w = 1920,
-    window_h = 1080,
+int window_w = 1500,
+    window_h = 1000,
     world_w  = 1500,
     world_h  = 1500;
 
@@ -176,7 +176,7 @@ void initialize(void)
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
     window = glfwCreateWindow(window_w, window_h, "GLFW Window",
-        glfwGetPrimaryMonitor(), NULL);
+        NULL, NULL);
 
     if (!window)
     {
@@ -228,7 +228,7 @@ int main(int argc, char **argv)
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         gluOrtho2D(0.0, window_w, 0, window_h);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         double delay = (walltime() - start) * 1.0e+3;
         if (delay > UPDATE_RATE)
@@ -246,11 +246,6 @@ int main(int argc, char **argv)
         {
             Spaceship *s = spaceships[i];
             s->update(s);
-        }
-
-        for (int i = 0; i < NUM_SPACESHIPS; i++)
-        {
-            Spaceship *s = spaceships[i];
             s->draw(s);
         }
 

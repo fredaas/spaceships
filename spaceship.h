@@ -196,8 +196,8 @@ void update(Spaceship *self)
         }
         else
         {
-            self->cx += cos(self->r)* self->acceleration;
-            self->cy += sin(self->r)* self->acceleration;
+            self->cx += cos(self->r) * self->acceleration;
+            self->cy += sin(self->r) * self->acceleration;
         }
     }
     else if (self->state == SPACESHIP_DEAD)
