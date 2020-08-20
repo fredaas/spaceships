@@ -3,7 +3,8 @@
 
 #define FPS 60
 #define UPDATE_RATE 1000 / (float)FPS
-#define NUM_SPACESHIPS 200
+
+int num_spaceships = 32;
 
 enum {
     MOUSE_LEFT,
@@ -24,7 +25,7 @@ int window_w = 1500,
 
 GLFWwindow* window;
 
-Spaceship *spaceships[NUM_SPACESHIPS];
+Spaceship **spaceships = NULL;
 
 
 /*******************************************************************************
@@ -51,7 +52,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action,
         case GLFW_KEY_S:
             break;
         case GLFW_KEY_D:
-            for (int i = 0; i < NUM_SPACESHIPS; i++)
+            for (int i = 0; i < num_spaceships; i++)
             {
                 Spaceship *s = spaceships[i];
                 s->dead = 1;
@@ -200,7 +201,9 @@ void initialize(void)
 
     /* Init spaceships */
 
-    for (int i = 0; i < NUM_SPACESHIPS; i++)
+    spaceships = (Spaceship **)malloc(num_spaceships * sizeof(Spaceship *));
+
+    for (int i = 0; i < num_spaceships; i++)
     {
         Spaceship *s = init_spaceship(
             rand_float(0, window_w),
@@ -214,6 +217,11 @@ void initialize(void)
 
 int main(int argc, char **argv)
 {
+    if (argc > 1)
+        num_spaceships = atoi(argv[1]);
+
+    printf("Number of spaceships: %d\n", num_spaceships);
+
     srand(time(NULL));
 
     initialize();
@@ -227,14 +235,14 @@ int main(int argc, char **argv)
 
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        gluOrtho2D(0.0, window_w, 0, window_h);
+        gluOrtho2D(0, window_w, 0, window_h);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         double delay = (walltime() - start) * 1.0e+3;
         if (delay > UPDATE_RATE)
         {
             start = walltime();
-            for (int i = 0; i < NUM_SPACESHIPS; i++)
+            for (int i = 0; i < num_spaceships; i++)
             {
                 Spaceship *s = spaceships[i];
                 if (!s->dead)
@@ -242,7 +250,7 @@ int main(int argc, char **argv)
             }
         }
 
-        for (int i = 0; i < NUM_SPACESHIPS; i++)
+        for (int i = 0; i < num_spaceships; i++)
         {
             Spaceship *s = spaceships[i];
             s->update(s);
