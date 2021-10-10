@@ -57,7 +57,7 @@ Spaceship * init_spaceship(float cx, float cy, double r)
     self->state = SPACESHIP_ALIVE;
     self->dead = 0;
     self->alpha = 1.0;
-    self->acceleration = rand_float(0.1, 0.15);
+    self->acceleration = rand_float(5.0, 10.0);
     self->color[0] = rand_float(0, 1);
     self->color[1] = rand_float(0, 1);
     self->color[2] = rand_float(0, 1);
@@ -169,7 +169,7 @@ void rotate_right(Spaceship *self)
 
 int faded(Spaceship *self)
 {
-    self->alpha *= 0.9997;
+    self->alpha *= 0.98;
     if (self->alpha < 0.01)
     {
         self->alpha = 0;
@@ -210,8 +210,8 @@ void update(Spaceship *self)
         };
         for (int i = 0; i < SPACESHIP_POINTS; i++)
         {
-            self->tx[i] += cos(r[i]) * 0.01;
-            self->ty[i] += sin(r[i]) * 0.01;
+            self->tx[i] += cos(r[i]) * 1.0;
+            self->ty[i] += sin(r[i]) * 1.0;
         }
     }
 }
