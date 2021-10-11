@@ -1,5 +1,6 @@
 #include "utils.h"
 #include "spaceship.h"
+#include "deltatime.h"
 
 #define FPS 60
 #define UPDATE_RATE 1000 / (float)FPS
@@ -259,6 +260,8 @@ int main(int argc, char **argv)
 
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+        dt_update();
     }
 
     glfwDestroyWindow(window);

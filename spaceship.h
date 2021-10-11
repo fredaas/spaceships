@@ -2,6 +2,7 @@
 #define SPACESHIP_H
 
 #include "utils.h"
+#include "deltatime.h"
 
 #define SPACESHIP_POINTS (int)4
 #define SPACESHIP_MAX_SPEED (float)1
@@ -53,11 +54,11 @@ Spaceship * init_spaceship(float cx, float cy, double r)
     self->r = PI / 2.0;
     self->cx = cx;
     self->cy = cy;
-    self->h = rand_float(0.025, 0.05);
+    self->h = rand_float(PI / 2, PI * 3 / 2);
     self->state = SPACESHIP_ALIVE;
     self->dead = 0;
     self->alpha = 1.0;
-    self->acceleration = rand_float(5.0, 10.0);
+    self->acceleration = rand_float(50.0, 500.0);
     self->color[0] = rand_float(0, 1);
     self->color[1] = rand_float(0, 1);
     self->color[2] = rand_float(0, 1);
@@ -148,7 +149,7 @@ void rotate_toward(Spaceship *self, float x, float y)
 
     int k = ((tv[0] * sv[1] - tv[1] * sv[0]) < 0) ? 1 : -1;
 
-    rotate(self, k * self->h);
+    rotate(self, k * self->h * dt);
 }
 
 /* Sets the current direction of the object to 'r' radians */
@@ -159,12 +160,12 @@ void set_angle(Spaceship *self, double r)
 
 void rotate_left(Spaceship *self)
 {
-    rotate(self, self->h);
+    rotate(self, self->h * dt);
 }
 
 void rotate_right(Spaceship *self)
 {
-    rotate(self, -self->h);
+    rotate(self, -self->h * dt);
 }
 
 int faded(Spaceship *self)
@@ -196,8 +197,8 @@ void update(Spaceship *self)
         }
         else
         {
-            self->cx += cos(self->r) * self->acceleration;
-            self->cy += sin(self->r) * self->acceleration;
+            self->cx += cos(self->r) * self->acceleration * dt;
+            self->cy += sin(self->r) * self->acceleration * dt;
         }
     }
     else if (self->state == SPACESHIP_DEAD)
@@ -210,8 +211,8 @@ void update(Spaceship *self)
         };
         for (int i = 0; i < SPACESHIP_POINTS; i++)
         {
-            self->tx[i] += cos(r[i]) * 1.0;
-            self->ty[i] += sin(r[i]) * 1.0;
+            self->tx[i] += cos(r[i]) * 100 * dt;
+            self->ty[i] += sin(r[i]) * 100 * dt;
         }
     }
 }
