@@ -34,14 +34,18 @@ long dt_msec(void)
 
 void dt_update(void)
 {
-    static double time = 0;
-    double walltime = dt_walltime();
-    if (time == 0)
+    static double t_prev = 0;
+
+    double t_curr = dt_walltime();
+
+    /* Initialize t_prev if this is the first call to this function */
+    if (t_prev == 0)
     {
-        time = walltime;
+        t_prev = t_curr;
         return;
     }
-    double value = time;
-    time = walltime;
-    dt = walltime - value;
+
+    dt = t_curr - t_prev;
+
+    t_prev = t_curr;
 }
